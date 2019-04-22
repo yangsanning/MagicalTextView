@@ -238,7 +238,7 @@ public class MagicalTextView extends View {
             String lineText = lineTextList.get(i);
             textPaint.setColor((isForceMaxHeight && i >= virtualStartLine) ? Color.TRANSPARENT : textColor);
             if (maxLine == i + 1) {
-                canvas.drawText(getPassText(lineText), paddingLeft, marginTop, textPaint);
+                canvas.drawText(getPassText(lineText, true), paddingLeft, marginTop, textPaint);
                 textPaint.setColor(detailsTextColor);
                 canvas.drawText(detailsText, (viewWidth - paddingRight - detailsTextWidth), marginTop, textPaint);
                 break;
@@ -258,12 +258,12 @@ public class MagicalTextView extends View {
         return (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent;
     }
 
-    private String getPassText(String text) {
+    private String getPassText(String text, boolean isFirst) {
         lineTextWidth = (int) textPaint.measureText(text);
         if (lineTextWidth >= maxLineTextWidth) {
-            return getPassText(text.substring(0, text.length() - 1));
+            return getPassText(text.substring(0, text.length() - 1), false);
         }
-        return text + endTagText;
+        return isFirst ? text : text + endTagText;
     }
 
     @Override
