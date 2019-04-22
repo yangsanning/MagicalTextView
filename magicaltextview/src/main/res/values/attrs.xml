@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="MagicalTextView">
+        <attr name="mtv_padding_left" format="dimension" />
+        <attr name="mtv_padding_top" format="dimension" />
+        <attr name="mtv_padding_right" format="dimension" />
+        <attr name="mtv_padding_bottom" format="dimension" />
+        <attr name="mtv_text_size" format="dimension" />
+        <attr name="mtv_default_text" format="string" />
+        <attr name="mtv_default_text_color" format="color" />
+        <attr name="mtv_details_text" format="string" />
+        <attr name="mtv_details_text_color" format="color" />
+        <attr name="mtv_details_margin_left" format="dimension" />
+        <attr name="mtv_row_width" format="dimension" />
+        <attr name="mtv_max_line" format="integer" />
+    </declare-styleable>
+</resources>
