@@ -14,10 +14,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        app:mtv_padding_bottom="5dp"
-        app:mtv_padding_left="5dp"
-        app:mtv_padding_right="5dp"
-        app:mtv_padding_top="5dp"
+        app:mtv_padding_bottom="8dp"
+        app:mtv_padding_left="8dp"
+        app:mtv_padding_right="8dp"
+        app:mtv_padding_top="8dp"
         app:mtv_details_text="详细分析"
+        app:mtv_force_max_height="true"
+        app:mtv_max_line="2"
+        app:mtv_row_width="10dp"
         app:mtv_text_size="13sp" />
 </LinearLayout>

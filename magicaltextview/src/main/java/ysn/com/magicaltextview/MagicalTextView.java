@@ -41,11 +41,19 @@ public class MagicalTextView extends View {
      * 最大显示行数
      */
     private int maxLine;
+    /**
+     * 强制最大高度
+     */
+    private boolean isForceMaxHeight;
+    /**
+     * isForceMaxHeight =true 的情况下，记录虚拟的开始行
+     */
+    private int virtualStartLine;
 
     private int viewWidth, viewHeight;
 
     private char[] textCharArray;
-    private List<String> lineTextList;
+    private List<String> lineTextList = new ArrayList<>();
     private Rect[] textRectArray = null;
     private String endTagText = "...";
     private int endTagTextWidth, detailsTextWidth, maxLineTextWidth, lineTextWidth;
@@ -95,6 +103,7 @@ public class MagicalTextView extends View {
         rowWidth = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_row_width, 7);
         maxLine = typedArray.getInteger(R.styleable.MagicalTextView_mtv_max_line, 3);
 
+        isForceMaxHeight = typedArray.getBoolean(R.styleable.MagicalTextView_mtv_force_max_height, false);
         typedArray.recycle();
     }
 
@@ -146,7 +155,33 @@ public class MagicalTextView extends View {
             return;
         }
 
-        lineTextList = new ArrayList<>();
+        initTextList();
+
+        int textHeight = 0;
+        textRectArray = new Rect[lineTextList.size()];
+        for (int i = 0, length = lineTextList.size(); i < length && i < maxLine; i++) {
+            String lineText = lineTextList.get(i);
+            Rect lineTextRect = new Rect();
+            textPaint.getTextBounds(lineText, 0, lineText.length(), lineTextRect);
+            if (heightMode == MeasureSpec.AT_MOST) {
+                if (i == length - 1 || i == maxLine - 1) {
+                    textHeight += lineTextRect.height() + paddingBottom + paddingTop;
+                } else {
+                    textHeight += (lineTextRect.height() + rowWidth);
+                }
+            } else {
+                if (textHeight == 0) {
+                    textHeight = getMeasuredHeight();
+                }
+            }
+            textRectArray[i] = lineTextRect;
+        }
+
+        setMeasuredDimension(getMeasuredWidth(), textHeight);
+    }
+
+    private void initTextList() {
+        lineTextList.clear();
         lineTextWidth = getMeasuredWidth() - paddingLeft - paddingRight;
         int currentLTextWidth = 0;
         StringBuilder textStringBuilder = new StringBuilder();
@@ -166,27 +201,12 @@ public class MagicalTextView extends View {
             }
         }
 
-        int textHeight = 0;
-        textRectArray = new Rect[lineTextList.size()];
-        for (int i = 0, length = lineTextList.size(); i < length && i < maxLine; i++) {
-            String lineText = lineTextList.get(i);
-            Rect lineTextRect = new Rect();
-            textPaint.getTextBounds(lineText, 0, lineText.length(), lineTextRect);
-            if (heightMode == MeasureSpec.AT_MOST) {
-                if (i == length - 1 || i == maxLine - 1) {
-                    textHeight += lineTextRect.height() + paddingBottom + paddingTop;
-                }else {
-                    textHeight += (lineTextRect.height() + rowWidth);
-                }
-            } else {
-                if (textHeight == 0) {
-                    textHeight = getMeasuredHeight();
-                }
+        if (isForceMaxHeight) {
+            virtualStartLine = lineTextList.size();
+            for (int i = lineTextList.size(); i < maxLine; i++) {
+                lineTextList.add("哈");
             }
-            textRectArray[i] = lineTextRect;
         }
-
-        setMeasuredDimension(getMeasuredWidth(), textHeight);
     }
 
     /**
@@ -209,15 +229,14 @@ public class MagicalTextView extends View {
      * 绘制文本
      */
     public void drawText(Canvas canvas) {
-        if (lineTextList == null || lineTextList.size() == 0) {
+        if (lineTextList.size() == 0) {
             return;
         }
 
-        textPaint.setColor(textColor);
         int marginTop = getTopTextMarginTop();
         for (int i = 0, length = lineTextList.size(); i < length; i++) {
             String lineText = lineTextList.get(i);
-
+            textPaint.setColor((isForceMaxHeight && i >= virtualStartLine) ? Color.TRANSPARENT : textColor);
             if (maxLine == i + 1) {
                 canvas.drawText(getPassText(lineText), paddingLeft, marginTop, textPaint);
                 textPaint.setColor(detailsTextColor);
@@ -301,9 +320,8 @@ public class MagicalTextView extends View {
         requestLayout();
     }
 
-    public MagicalTextView setOnDetailsClickListener(OnDetailsClickListener onDetailsClickListener) {
+    public void setOnDetailsClickListener(OnDetailsClickListener onDetailsClickListener) {
         this.onDetailsClickListener = onDetailsClickListener;
-        return this;
     }
 
     interface OnDetailsClickListener {
