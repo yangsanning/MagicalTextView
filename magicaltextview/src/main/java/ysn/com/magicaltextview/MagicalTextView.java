@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -57,6 +58,7 @@ public class MagicalTextView extends View {
     private Rect[] textRectArray = null;
     private String endTagText = "...";
     private int endTagTextWidth, detailsTextWidth, maxLineTextWidth, lineTextWidth;
+    private int boldEndIndex;
 
     private boolean isRangeDown;
     private OnDetailsClickListener onDetailsClickListener;
@@ -199,6 +201,9 @@ public class MagicalTextView extends View {
                     lineTextList.add(textStringBuilder.toString());
                 }
             }
+            if (lineTextList.size() >= maxLine) {
+                break;
+            }
         }
 
         if (isForceMaxHeight) {
@@ -233,9 +238,22 @@ public class MagicalTextView extends View {
             return;
         }
 
+        // 绘制第一行(处理加粗情况)
+        textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        textPaint.setColor(textColor);
+        String lineText = lineTextList.get(0);
+        String startText = lineText.substring(0, boldEndIndex);
         int marginTop = getTopTextMarginTop();
-        for (int i = 0, length = lineTextList.size(); i < length; i++) {
-            String lineText = lineTextList.get(i);
+        canvas.drawText(startText, paddingLeft, marginTop, textPaint);
+
+        float startX = (textPaint.measureText(startText) + paddingLeft);
+        textPaint.setTypeface(Typeface.DEFAULT);
+        canvas.drawText(lineText.substring(boldEndIndex), startX, marginTop, textPaint);
+
+        // 绘制剩余行数
+        for (int i = 1, length = lineTextList.size(); i < length; i++) {
+            lineText = lineTextList.get(i);
+            marginTop += (textRectArray[i].height() + rowWidth);
             textPaint.setColor((isForceMaxHeight && i >= virtualStartLine) ? Color.TRANSPARENT : textColor);
             if (maxLine == i + 1) {
                 canvas.drawText(getPassText(lineText, true), paddingLeft, marginTop, textPaint);
@@ -244,7 +262,6 @@ public class MagicalTextView extends View {
                 break;
             } else {
                 canvas.drawText(lineText, paddingLeft, marginTop, textPaint);
-                marginTop += (textRectArray[i].height() + rowWidth);
             }
         }
     }
@@ -308,16 +325,40 @@ public class MagicalTextView extends View {
         return (event.getX() > maxLineTextWidth) && event.getY() > rangeY;
     }
 
+    public MagicalTextView setMaxLine(int maxLine) {
+        this.maxLine = maxLine;
+        requestLayout();
+        return this;
+    }
+
+    public MagicalTextView setForceMaxHeight(boolean forceMaxHeight) {
+        isForceMaxHeight = forceMaxHeight;
+        return this;
+    }
+
     /**
      * 设置文本
      */
-    public void setText(String text) {
+    public MagicalTextView setText(String text, int boldEndIndex) {
         if (TextUtils.isEmpty(text)) {
-            return;
+            return this;
+        }
+        setText(text);
+        this.boldEndIndex = boldEndIndex;
+        return this;
+    }
+
+    /**
+     * 设置文本
+     */
+    public MagicalTextView setText(String text) {
+        if (TextUtils.isEmpty(text)) {
+            return this;
         }
 
         textCharArray = text.toCharArray();
         requestLayout();
+        return this;
     }
 
     public void setOnDetailsClickListener(OnDetailsClickListener onDetailsClickListener) {
