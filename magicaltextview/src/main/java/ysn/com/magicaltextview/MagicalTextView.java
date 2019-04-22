@@ -11,6 +11,7 @@ import android.os.Build;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -44,10 +45,13 @@ public class MagicalTextView extends View {
     private int viewWidth, viewHeight;
 
     private char[] textCharArray;
-    private List<String> textList;
+    private List<String> lineTextList;
     private Rect[] textRectArray = null;
     private String endTagText = "...";
-    private int endTagTextWidth, detailsTextWidth, lineTextWidth;
+    private int endTagTextWidth, detailsTextWidth, maxLineTextWidth, lineTextWidth;
+
+    private boolean isRangeDown;
+    private OnDetailsClickListener onDetailsClickListener;
 
     public MagicalTextView(Context context) {
         this(context, null);
@@ -123,6 +127,8 @@ public class MagicalTextView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         viewWidth = w;
         viewHeight = h;
+
+        maxLineTextWidth = viewWidth - paddingLeft - paddingRight - endTagTextWidth - detailsMarginLeft - detailsTextWidth;
     }
 
     @Override
@@ -140,7 +146,7 @@ public class MagicalTextView extends View {
             return;
         }
 
-        textList = new ArrayList<>();
+        lineTextList = new ArrayList<>();
         lineTextWidth = getMeasuredWidth() - paddingLeft - paddingRight;
         int currentLTextWidth = 0;
         StringBuilder textStringBuilder = new StringBuilder();
@@ -148,22 +154,22 @@ public class MagicalTextView extends View {
             char textChar = textCharArray[i];
             currentLTextWidth += getSingleCharWidth(textChar);
             if (currentLTextWidth > lineTextWidth) {
-                textList.add(textStringBuilder.toString());
+                lineTextList.add(textStringBuilder.toString());
                 textStringBuilder.delete(0, textStringBuilder.length());
                 currentLTextWidth = 0;
                 i--;
             } else {
                 textStringBuilder.append(textChar);
                 if (i == length - 1) {
-                    textList.add(textStringBuilder.toString());
+                    lineTextList.add(textStringBuilder.toString());
                 }
             }
         }
 
         int textHeight = 0;
-        textRectArray = new Rect[textList.size()];
-        for (int i = 0, length = textList.size(); i < length && i < maxLine; i++) {
-            String lineText = textList.get(i);
+        textRectArray = new Rect[lineTextList.size()];
+        for (int i = 0, length = lineTextList.size(); i < length && i < maxLine; i++) {
+            String lineText = lineTextList.get(i);
             Rect lineTextRect = new Rect();
             textPaint.getTextBounds(lineText, 0, lineText.length(), lineTextRect);
             if (heightMode == MeasureSpec.AT_MOST) {
@@ -203,14 +209,14 @@ public class MagicalTextView extends View {
      * 绘制文本
      */
     public void drawText(Canvas canvas) {
-        if (textList == null || textList.size() == 0) {
+        if (lineTextList == null || lineTextList.size() == 0) {
             return;
         }
 
         textPaint.setColor(textColor);
         int marginTop = getTopTextMarginTop();
-        for (int i = 0, length = textList.size(); i < length; i++) {
-            String lineText = textList.get(i);
+        for (int i = 0, length = lineTextList.size(); i < length; i++) {
+            String lineText = lineTextList.get(i);
 
             if (maxLine == i + 1) {
                 canvas.drawText(getPassText(lineText), paddingLeft, marginTop, textPaint);
@@ -235,11 +241,52 @@ public class MagicalTextView extends View {
 
     private String getPassText(String text) {
         lineTextWidth = (int) textPaint.measureText(text);
-        int fixWidth = viewWidth - paddingLeft - paddingRight - endTagTextWidth - detailsMarginLeft - detailsTextWidth;
-        if (lineTextWidth >= fixWidth) {
+        if (lineTextWidth >= maxLineTextWidth) {
             return getPassText(text.substring(0, text.length() - 1));
         }
         return text + endTagText;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_DOWN:
+                isRangeDown = isRangeDown(event);
+                break;
+            case MotionEvent.ACTION_UP:
+                // 判断是否是移动到外部再抬起手指
+                if (isOutsideUp(event)) {
+                    event.setAction(MotionEvent.ACTION_CANCEL);
+                    break;
+                }
+                if (isRangeDown && isRangeDown(event) && onDetailsClickListener != null) {
+                    onDetailsClickListener.onDetailsClick();
+                } else {
+                    performClick();
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
+    /**
+     * 判断是否是移动到外部再抬起手指
+     */
+    private boolean isOutsideUp(MotionEvent event) {
+        float touchX = event.getX();
+        float touchY = event.getY();
+        return touchX < 0 || touchX > viewWidth || touchY < 0 || touchY > viewHeight;
+    }
+
+    /**
+     * 是否在详情范围内
+     */
+    private boolean isRangeDown(MotionEvent event) {
+        int rangeY = viewHeight - paddingBottom - textRectArray[maxLine - 1].height();
+        return (event.getX() > maxLineTextWidth) && event.getY() > rangeY;
     }
 
     /**
@@ -252,5 +299,15 @@ public class MagicalTextView extends View {
 
         textCharArray = text.toCharArray();
         requestLayout();
+    }
+
+    public MagicalTextView setOnDetailsClickListener(OnDetailsClickListener onDetailsClickListener) {
+        this.onDetailsClickListener = onDetailsClickListener;
+        return this;
+    }
+
+    interface OnDetailsClickListener {
+
+        void onDetailsClick();
     }
 }
