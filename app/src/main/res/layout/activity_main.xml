@@ -10,7 +10,7 @@
     tools:context=".MainActivity">
 
     <ysn.com.magicaltextview.MagicalTextView
-        android:id="@+id/main_activity_text_view"
+        android:id="@+id/main_activity_text_view1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
@@ -20,7 +20,45 @@
         app:mtv_padding_top="8dp"
         app:mtv_details_text="详细分析"
         app:mtv_force_max_height="true"
+        app:mtv_default_text="@string/text1"
+        app:mtv_details_text_color="@color/mtv_details_text_color"
+        app:mtv_max_line="3"
+        app:mtv_row_width="10dp"
+        app:mtv_text_size="13sp" />
+
+    <ysn.com.magicaltextview.MagicalTextView
+        android:id="@+id/main_activity_text_view2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/white"
+        app:mtv_default_text="@string/text2"
+        app:mtv_details_text="设置图标"
+        app:mtv_force_max_height="true"
         app:mtv_max_line="2"
+        app:mtv_padding_bottom="8dp"
+        app:mtv_padding_left="8dp"
+        app:mtv_padding_right="8dp"
+        app:mtv_padding_top="8dp"
+        app:mtv_row_width="10dp"
+        app:mtv_text_size="13sp" />
+
+    <ysn.com.magicaltextview.MagicalTextView
+        android:id="@+id/main_activity_text_view3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/white"
+        app:mtv_default_text="@string/text3"
+        app:mtv_details_image="@drawable/ic_arrow_blue"
+        app:mtv_details_text="详细分析"
+        app:mtv_force_max_height="true"
+        app:mtv_max_line="2"
+        app:mtv_details_image_margin_left="3dp"
+        app:mtv_padding_bottom="8dp"
+        app:mtv_padding_left="8dp"
+        app:mtv_padding_right="8dp"
+        app:mtv_padding_top="8dp"
         app:mtv_row_width="10dp"
         app:mtv_text_size="13sp" />
 </LinearLayout>

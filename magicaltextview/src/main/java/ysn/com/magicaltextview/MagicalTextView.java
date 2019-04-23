@@ -3,11 +3,13 @@ package ysn.com.magicaltextview;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -51,13 +53,18 @@ public class MagicalTextView extends View {
      */
     private int virtualStartLine;
 
+    private Bitmap detailsImage;
+    private int detailsImageWidth;
+    private int detailsImageHeight;
+    private int detailsImageMarginLeft;
+
     private int viewWidth, viewHeight;
 
     private char[] textCharArray;
     private List<String> lineTextList = new ArrayList<>();
     private Rect[] textRectArray = null;
     private String endTagText = "...";
-    private int endTagTextWidth, detailsTextWidth, maxLineTextWidth, lineTextWidth;
+    private int endTagTextWidth, detailsTextWidth, lineTextWidth;
     private int boldEndIndex;
 
     private boolean isRangeDown;
@@ -91,9 +98,11 @@ public class MagicalTextView extends View {
     private void initAttrs(Context context, AttributeSet attrs) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MagicalTextView);
         defaultText = typedArray.getString(R.styleable.MagicalTextView_mtv_default_text);
-        textColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_default_text_color, Color.BLACK);
+        textColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_default_text_color,
+                context.getResources().getColor(R.color.mtv_text_color));
         detailsText = typedArray.getString(R.styleable.MagicalTextView_mtv_details_text);
-        detailsTextColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_details_text_color, Color.BLUE);
+        detailsTextColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_details_text_color,
+                context.getResources().getColor(R.color.mtv_details_text_color));
         detailsMarginLeft = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_margin_left, 0);
         textSize = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_text_size, 50);
 
@@ -106,7 +115,24 @@ public class MagicalTextView extends View {
         maxLine = typedArray.getInteger(R.styleable.MagicalTextView_mtv_max_line, 3);
 
         isForceMaxHeight = typedArray.getBoolean(R.styleable.MagicalTextView_mtv_force_max_height, false);
+
+        Drawable detailsImage = typedArray.getDrawable(R.styleable.MagicalTextView_mtv_details_image);
+        detailsImageWidth = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_image_width, 20);
+        detailsImageHeight = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_image_height, 30);
+        detailsImageMarginLeft = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_image_margin_left, 10);
+        if (detailsImage != null) {
+            zoomBitmap(drawableToBitmap(detailsImage));
+        }
+
         typedArray.recycle();
+    }
+
+    private Bitmap drawableToBitmap(Drawable drawable) {
+        return ImageUtils.drawableToBitmap(drawable);
+    }
+
+    private void zoomBitmap(Bitmap bitmap) {
+        detailsImage = ImageUtils.zoomBitmap(bitmap, detailsImageWidth, detailsImageHeight);
     }
 
     private void initPaint() {
@@ -138,8 +164,6 @@ public class MagicalTextView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         viewWidth = w;
         viewHeight = h;
-
-        maxLineTextWidth = viewWidth - paddingLeft - paddingRight - endTagTextWidth - detailsMarginLeft - detailsTextWidth;
     }
 
     @Override
@@ -258,7 +282,8 @@ public class MagicalTextView extends View {
             if (maxLine == i + 1) {
                 canvas.drawText(getPassText(lineText, true), paddingLeft, marginTop, textPaint);
                 textPaint.setColor(detailsTextColor);
-                canvas.drawText(detailsText, (viewWidth - paddingRight - detailsTextWidth), marginTop, textPaint);
+                canvas.drawText(detailsText, getDetailsStartX(), marginTop, textPaint);
+                drawDetailsBitmap(canvas, marginTop);
                 break;
             } else {
                 canvas.drawText(lineText, paddingLeft, marginTop, textPaint);
@@ -277,10 +302,31 @@ public class MagicalTextView extends View {
 
     private String getPassText(String text, boolean isFirst) {
         lineTextWidth = (int) textPaint.measureText(text);
-        if (lineTextWidth >= maxLineTextWidth) {
+        if (lineTextWidth >= getMaxLineTextWidth()) {
             return getPassText(text.substring(0, text.length() - 1), false);
         }
         return isFirst ? text : text + endTagText;
+    }
+
+    private int getMaxLineTextWidth() {
+        int maxLineTextWidth = viewWidth - paddingLeft - paddingRight - endTagTextWidth - detailsMarginLeft - detailsTextWidth;
+        if (detailsImage != null) {
+            maxLineTextWidth -= (detailsImageWidth + detailsImageMarginLeft);
+        }
+        return maxLineTextWidth;
+    }
+
+    private int getDetailsStartX() {
+        int x = viewWidth - paddingRight - detailsTextWidth;
+        return detailsImage == null ? x : (x - detailsImageWidth - detailsImageMarginLeft);
+    }
+
+    private void drawDetailsBitmap(Canvas canvas, int marginTop) {
+        if (detailsImage != null) {
+            float bitmapLeft = viewWidth - paddingRight - detailsImageWidth;
+            float bitmapTop = marginTop - textRectArray[maxLine - 1].height() + detailsImageHeight / 2f;
+            canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, textPaint);
+        }
     }
 
     @Override
@@ -297,7 +343,7 @@ public class MagicalTextView extends View {
                     break;
                 }
                 if (isRangeDown && isRangeDown(event) && onDetailsClickListener != null) {
-                    onDetailsClickListener.onDetailsClick();
+                    onDetailsClickListener.onDetailsClick(this);
                 } else {
                     performClick();
                 }
@@ -322,7 +368,7 @@ public class MagicalTextView extends View {
      */
     private boolean isRangeDown(MotionEvent event) {
         int rangeY = viewHeight - paddingBottom - textRectArray[maxLine - 1].height();
-        return (event.getX() > maxLineTextWidth) && event.getY() > rangeY;
+        return (event.getX() > getMaxLineTextWidth()) && event.getY() > rangeY;
     }
 
     public MagicalTextView setMaxLine(int maxLine) {
@@ -333,6 +379,16 @@ public class MagicalTextView extends View {
 
     public MagicalTextView setForceMaxHeight(boolean forceMaxHeight) {
         isForceMaxHeight = forceMaxHeight;
+        return this;
+    }
+
+    public MagicalTextView setDetailsImage(Drawable detailsDrawable) {
+        return setDetailsImage(drawableToBitmap(detailsDrawable));
+    }
+
+    public MagicalTextView setDetailsImage(Bitmap detailsImage) {
+        zoomBitmap(detailsImage);
+        invalidate();
         return this;
     }
 
@@ -361,12 +417,13 @@ public class MagicalTextView extends View {
         return this;
     }
 
-    public void setOnDetailsClickListener(OnDetailsClickListener onDetailsClickListener) {
+    public MagicalTextView setOnDetailsClickListener(OnDetailsClickListener onDetailsClickListener) {
         this.onDetailsClickListener = onDetailsClickListener;
+        return this;
     }
 
     interface OnDetailsClickListener {
 
-        void onDetailsClick();
+        void onDetailsClick(MagicalTextView magicalTextView);
     }
 }

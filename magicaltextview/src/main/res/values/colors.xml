@@ -2,4 +2,5 @@
 <resources>
 
     <color name="mtv_text_color">#333333</color>
+    <color name="mtv_details_text_color">#308ef2</color>
 </resources>

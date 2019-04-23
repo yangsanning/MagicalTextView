@@ -15,5 +15,10 @@
         <attr name="mtv_row_width" format="dimension" />
         <attr name="mtv_max_line" format="integer" />
         <attr name="mtv_force_max_height" format="boolean" />
+
+        <attr name="mtv_details_image" format="reference" />
+        <attr name="mtv_details_image_width" format="dimension" />
+        <attr name="mtv_details_image_height" format="dimension" />
+        <attr name="mtv_details_image_margin_left" format="dimension" />
     </declare-styleable>
 </resources>
