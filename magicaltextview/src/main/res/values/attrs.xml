@@ -2,23 +2,31 @@
 <resources>
 
     <declare-styleable name="MagicalTextView">
-        <attr name="mtv_default_text" format="string" />
-        <attr name="mtv_default_text_color" format="color" />
-        <attr name="mtv_details_text" format="string" />
-        <attr name="mtv_details_text_color" format="color" />
-        <attr name="mtv_details_margin_left" format="dimension" />
-        <attr name="mtv_text_size" format="dimension" />
         <attr name="mtv_padding_left" format="dimension" />
         <attr name="mtv_padding_top" format="dimension" />
         <attr name="mtv_padding_right" format="dimension" />
         <attr name="mtv_padding_bottom" format="dimension" />
-        <attr name="mtv_row_width" format="dimension" />
-        <attr name="mtv_max_line" format="integer" />
-        <attr name="mtv_force_max_height" format="boolean" />
+
+        <attr name="mtv_bold_text_color" format="color" />
+        <attr name="mtv_bold_text_size" format="dimension" />
+        <attr name="mtv_bold_end_index" format="integer" />
+
+        <attr name="mtv_default_text" format="string" />
+        <attr name="mtv_default_text_color" format="color" />
+        <attr name="mtv_default_text_size" format="dimension" />
+
+        <attr name="mtv_details_text" format="string" />
+        <attr name="mtv_details_text_color" format="color" />
+        <attr name="mtv_details_text_size" format="dimension" />
+        <attr name="mtv_details_margin_left" format="dimension" />
 
         <attr name="mtv_details_image" format="reference" />
         <attr name="mtv_details_image_width" format="dimension" />
         <attr name="mtv_details_image_height" format="dimension" />
         <attr name="mtv_details_image_margin_left" format="dimension" />
+
+        <attr name="mtv_row_width" format="dimension" />
+        <attr name="mtv_max_line" format="integer" />
+        <attr name="mtv_force_max_height" format="boolean" />
     </declare-styleable>
 </resources>

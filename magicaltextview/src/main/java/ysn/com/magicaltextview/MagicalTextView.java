@@ -2,6 +2,7 @@ package ysn.com.magicaltextview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -29,13 +30,15 @@ import java.util.List;
  */
 public class MagicalTextView extends View {
 
-    private TextPaint textPaint;
-    private String defaultText, detailsText;
-    private int textColor, detailsTextColor;
-    private int textSize;
-    private int detailsMarginLeft;
-
     private int paddingLeft, paddingRight, paddingTop, paddingBottom;
+
+    private TextPaint boldTextPaint, defaultTextPaint, detailsTextPaint;
+    private String defaultText, detailsText;
+    private int boldTextColor, defaultTextColor, detailsTextColor;
+    private int boldTextSize, defaultTextSize, detailsTextSize;
+    private int detailsMarginLeft;
+    private int boldEndIndex;
+
     /**
      * 行宽
      */
@@ -65,7 +68,6 @@ public class MagicalTextView extends View {
     private Rect[] textRectArray = null;
     private String endTagText = "...";
     private int endTagTextWidth, detailsTextWidth, lineTextWidth;
-    private int boldEndIndex;
 
     private boolean isRangeDown;
     private OnDetailsClickListener onDetailsClickListener;
@@ -96,25 +98,26 @@ public class MagicalTextView extends View {
     }
 
     private void initAttrs(Context context, AttributeSet attrs) {
+        Resources resources = context.getResources();
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MagicalTextView);
-        defaultText = typedArray.getString(R.styleable.MagicalTextView_mtv_default_text);
-        textColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_default_text_color,
-                context.getResources().getColor(R.color.mtv_text_color));
-        detailsText = typedArray.getString(R.styleable.MagicalTextView_mtv_details_text);
-        detailsTextColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_details_text_color,
-                context.getResources().getColor(R.color.mtv_details_text_color));
-        detailsMarginLeft = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_margin_left, 0);
-        textSize = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_text_size, 50);
 
         paddingLeft = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_padding_left, 0);
         paddingRight = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_padding_right, 0);
         paddingTop = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_padding_top, 0);
         paddingBottom = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_padding_bottom, 0);
 
-        rowWidth = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_row_width, 7);
-        maxLine = typedArray.getInteger(R.styleable.MagicalTextView_mtv_max_line, 3);
+        boldTextColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_bold_text_color, resources.getColor(R.color.mtv_text_color));
+        boldTextSize = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_bold_text_size, 50);
+        boldEndIndex = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_bold_end_index, 0);
 
-        isForceMaxHeight = typedArray.getBoolean(R.styleable.MagicalTextView_mtv_force_max_height, false);
+        defaultText = typedArray.getString(R.styleable.MagicalTextView_mtv_default_text);
+        defaultTextColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_default_text_color, resources.getColor(R.color.mtv_text_color));
+        defaultTextSize = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_default_text_size, 50);
+
+        detailsText = typedArray.getString(R.styleable.MagicalTextView_mtv_details_text);
+        detailsTextColor = typedArray.getColor(R.styleable.MagicalTextView_mtv_details_text_color, resources.getColor(R.color.mtv_details_text_color));
+        detailsTextSize = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_text_size, 50);
+        detailsMarginLeft = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_margin_left, 0);
 
         Drawable detailsImage = typedArray.getDrawable(R.styleable.MagicalTextView_mtv_details_image);
         detailsImageWidth = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_image_width, 20);
@@ -123,6 +126,10 @@ public class MagicalTextView extends View {
         if (detailsImage != null) {
             zoomBitmap(drawableToBitmap(detailsImage));
         }
+
+        rowWidth = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_row_width, 7);
+        maxLine = typedArray.getInteger(R.styleable.MagicalTextView_mtv_max_line, 3);
+        isForceMaxHeight = typedArray.getBoolean(R.styleable.MagicalTextView_mtv_force_max_height, false);
 
         typedArray.recycle();
     }
@@ -136,11 +143,24 @@ public class MagicalTextView extends View {
     }
 
     private void initPaint() {
-        textPaint = new TextPaint();
-        textPaint.setAntiAlias(true);
-        textPaint.setTextSize(textSize);
-        textPaint.setColor(textColor);
-        textPaint.setTextAlign(Paint.Align.LEFT);
+        boldTextPaint = new TextPaint();
+        boldTextPaint.setColor(boldTextColor);
+        boldTextPaint.setTextSize(boldTextSize);
+        boldTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        boldTextPaint.setAntiAlias(true);
+        boldTextPaint.setTextAlign(Paint.Align.LEFT);
+
+        defaultTextPaint = new TextPaint();
+        defaultTextPaint.setColor(defaultTextColor);
+        defaultTextPaint.setTextSize(defaultTextSize);
+        defaultTextPaint.setAntiAlias(true);
+        defaultTextPaint.setTextAlign(Paint.Align.LEFT);
+
+        detailsTextPaint = new TextPaint();
+        detailsTextPaint.setColor(detailsTextColor);
+        detailsTextPaint.setTextSize(detailsTextSize);
+        detailsTextPaint.setAntiAlias(true);
+        detailsTextPaint.setTextAlign(Paint.Align.LEFT);
     }
 
     private void initView() {
@@ -149,13 +169,13 @@ public class MagicalTextView extends View {
         endTagTextWidth = 0;
         endTagText = endTagText == null ? "" : endTagText;
         for (char c : endTagText.toCharArray()) {
-            endTagTextWidth += getSingleCharWidth(c);
+            endTagTextWidth += getSingleCharWidth(defaultTextPaint, c);
         }
 
         detailsTextWidth = 0;
         detailsText = detailsText == null ? "" : detailsText;
         for (char c : detailsText.toCharArray()) {
-            detailsTextWidth += getSingleCharWidth(c);
+            detailsTextWidth += getSingleCharWidth(detailsTextPaint, c);
         }
     }
 
@@ -188,7 +208,7 @@ public class MagicalTextView extends View {
         for (int i = 0, length = lineTextList.size(); i < length && i < maxLine; i++) {
             String lineText = lineTextList.get(i);
             Rect lineTextRect = new Rect();
-            textPaint.getTextBounds(lineText, 0, lineText.length(), lineTextRect);
+            defaultTextPaint.getTextBounds(lineText, 0, lineText.length(), lineTextRect);
             if (heightMode == MeasureSpec.AT_MOST) {
                 if (i == length - 1 || i == maxLine - 1) {
                     textHeight += lineTextRect.height() + paddingBottom + paddingTop;
@@ -213,7 +233,8 @@ public class MagicalTextView extends View {
         StringBuilder textStringBuilder = new StringBuilder();
         for (int i = 0, length = textCharArray.length; i < length; i++) {
             char textChar = textCharArray[i];
-            currentLTextWidth += getSingleCharWidth(textChar);
+            // todo: 对加粗进行处理
+            currentLTextWidth += getSingleCharWidth(defaultTextPaint, textChar);
             if (currentLTextWidth > lineTextWidth) {
                 lineTextList.add(textStringBuilder.toString());
                 textStringBuilder.delete(0, textStringBuilder.length());
@@ -241,7 +262,7 @@ public class MagicalTextView extends View {
     /**
      * 得到单个char的宽度
      */
-    public float getSingleCharWidth(char textChar) {
+    public float getSingleCharWidth(TextPaint textPaint, char textChar) {
         float[] width = new float[1];
         textPaint.getTextWidths(new char[]{textChar}, 0, 1, width);
         return width[0];
@@ -263,45 +284,41 @@ public class MagicalTextView extends View {
         }
 
         // 绘制第一行(处理加粗情况)
-        textPaint.setTypeface(Typeface.DEFAULT_BOLD);
-        textPaint.setColor(textColor);
         String lineText = lineTextList.get(0);
         String startText = lineText.substring(0, boldEndIndex);
         int marginTop = getTopTextMarginTop();
-        canvas.drawText(startText, paddingLeft, marginTop, textPaint);
+        canvas.drawText(startText, paddingLeft, marginTop, boldTextPaint);
 
-        float startX = (textPaint.measureText(startText) + paddingLeft);
-        textPaint.setTypeface(Typeface.DEFAULT);
-        canvas.drawText(lineText.substring(boldEndIndex), startX, marginTop, textPaint);
+        float startX = (boldTextPaint.measureText(startText) + paddingLeft);
+        canvas.drawText(lineText.substring(boldEndIndex), startX, marginTop, defaultTextPaint);
 
         // 绘制剩余行数
         for (int i = 1, length = lineTextList.size(); i < length; i++) {
             lineText = lineTextList.get(i);
             marginTop += (textRectArray[i].height() + rowWidth);
-            textPaint.setColor((isForceMaxHeight && i >= virtualStartLine) ? Color.TRANSPARENT : textColor);
+            defaultTextPaint.setColor((isForceMaxHeight && i >= virtualStartLine) ? Color.TRANSPARENT : defaultTextColor);
             if (maxLine == i + 1) {
-                canvas.drawText(getPassText(lineText, true), paddingLeft, marginTop, textPaint);
-                textPaint.setColor(detailsTextColor);
-                canvas.drawText(detailsText, getDetailsStartX(), marginTop, textPaint);
+                canvas.drawText(getPassText(lineText, true), paddingLeft, marginTop, defaultTextPaint);
+                canvas.drawText(detailsText, getDetailsStartX(), marginTop, detailsTextPaint);
                 drawDetailsBitmap(canvas, marginTop);
                 break;
             } else {
-                canvas.drawText(lineText, paddingLeft, marginTop, textPaint);
+                canvas.drawText(lineText, paddingLeft, marginTop, defaultTextPaint);
             }
         }
     }
 
     private int getTopTextMarginTop() {
-        return textRectArray[0].height() / 2 + paddingTop + getFontSpace();
+        return textRectArray[0].height() / 2 + paddingTop + getFontSpace(boldEndIndex == 0 ? defaultTextPaint : boldTextPaint);
     }
 
-    private int getFontSpace() {
+    private int getFontSpace(TextPaint textPaint) {
         Paint.FontMetricsInt fontMetrics = textPaint.getFontMetricsInt();
         return (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent;
     }
 
     private String getPassText(String text, boolean isFirst) {
-        lineTextWidth = (int) textPaint.measureText(text);
+        lineTextWidth = (int) defaultTextPaint.measureText(text);
         if (lineTextWidth >= getMaxLineTextWidth()) {
             return getPassText(text.substring(0, text.length() - 1), false);
         }
@@ -325,7 +342,7 @@ public class MagicalTextView extends View {
         if (detailsImage != null) {
             float bitmapLeft = viewWidth - paddingRight - detailsImageWidth;
             float bitmapTop = marginTop - textRectArray[maxLine - 1].height() + detailsImageHeight / 2f;
-            canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, textPaint);
+            canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, defaultTextPaint);
         }
     }
 
