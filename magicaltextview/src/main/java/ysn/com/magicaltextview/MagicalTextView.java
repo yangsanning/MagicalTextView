@@ -309,7 +309,8 @@ public class MagicalTextView extends View {
     }
 
     private int getTopTextMarginTop() {
-        return textRectArray[0].height() / 2 + paddingTop + getFontSpace(boldEndIndex == 0 ? defaultTextPaint : boldTextPaint);
+//        return textRectArray[0].height() / 2 + paddingTop + getFontSpace(boldEndIndex == 0 ? defaultTextPaint : boldTextPaint);
+        return textRectArray[0].height() / 2 + paddingTop + getFontSpace(defaultTextPaint);
     }
 
     private int getFontSpace(TextPaint textPaint) {
@@ -341,7 +342,7 @@ public class MagicalTextView extends View {
     private void drawDetailsBitmap(Canvas canvas, int marginTop) {
         if (detailsImage != null) {
             float bitmapLeft = viewWidth - paddingRight - detailsImageWidth;
-            float bitmapTop = marginTop - textRectArray[maxLine - 1].height() + detailsImageHeight / 2f;
+            float bitmapTop = marginTop - textRectArray[maxLine - 1].height()/2f;
             canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, defaultTextPaint);
         }
     }
