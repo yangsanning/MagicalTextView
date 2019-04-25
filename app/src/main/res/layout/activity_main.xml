@@ -36,7 +36,7 @@
         android:layout_marginTop="20dp"
         android:background="@android:color/white"
         app:mtv_default_text="@string/text2"
-        app:mtv_details_text="设置图标"
+        app:mtv_details_text="点击设置详情图标"
         app:mtv_force_max_height="true"
         app:mtv_max_line="2"
         app:mtv_padding_bottom="8dp"

@@ -45,7 +45,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onDetailsClick(MagicalTextView magicalTextView) {
         switch (magicalTextView.getId()) {
             case R.id.main_activity_text_view2:
-                magicalTextView2.setDetailsImage(getResources().getDrawable(R.drawable.ic_arrow_blue));
+                if (magicalTextView2.getTag() == null) {
+                    magicalTextView2.setDetailsText("详细分析")
+                            .setDetailsImage(getResources().getDrawable(R.drawable.ic_arrow_blue))
+                            .setTag(false);
+                } else {
+                    Toast.makeText(MainActivity.this, "点击了详情", Toast.LENGTH_SHORT).show();
+                }
                 break;
             default:
                 Toast.makeText(MainActivity.this, "点击了详情", Toast.LENGTH_SHORT).show();

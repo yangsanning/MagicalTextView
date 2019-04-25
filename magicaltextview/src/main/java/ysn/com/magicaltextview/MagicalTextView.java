@@ -172,11 +172,7 @@ public class MagicalTextView extends View {
             endTagTextWidth += getSingleCharWidth(defaultTextPaint, c);
         }
 
-        detailsTextWidth = 0;
-        detailsText = detailsText == null ? "" : detailsText;
-        for (char c : detailsText.toCharArray()) {
-            detailsTextWidth += getSingleCharWidth(detailsTextPaint, c);
-        }
+        setDetailsText(detailsText);
     }
 
     @Override
@@ -408,7 +404,11 @@ public class MagicalTextView extends View {
     }
 
     public MagicalTextView setDetailsText(String detailsText) {
-        this.detailsText = detailsText;
+        this.detailsText = detailsText == null ? "" : detailsText;
+        this.detailsTextWidth = 0;
+        for (char c : this.detailsText.toCharArray()) {
+            detailsTextWidth += getSingleCharWidth(detailsTextPaint, c);
+        }
         return this;
     }
 
@@ -425,24 +425,26 @@ public class MagicalTextView extends View {
     /**
      * 设置文本
      */
-    public void setText(String text, int boldEndIndex) {
+    public MagicalTextView setText(String text, int boldEndIndex) {
         if (TextUtils.isEmpty(text)) {
-            return;
+            return this;
         }
         setText(text);
         this.boldEndIndex = boldEndIndex;
+        return this;
     }
 
     /**
      * 设置文本
      */
-    public void setText(String text) {
+    public MagicalTextView setText(String text) {
         if (TextUtils.isEmpty(text)) {
-            return;
+            return this;
         }
 
         textCharArray = text.toCharArray();
         requestLayout();
+        return this;
     }
 
     public MagicalTextView setOnDetailsClickListener(OnDetailsClickListener onDetailsClickListener) {
