@@ -402,8 +402,13 @@ public class MagicalTextView extends View {
         return this;
     }
 
-    public MagicalTextView setForceMaxHeight(boolean forceMaxHeight) {
-        isForceMaxHeight = forceMaxHeight;
+    public MagicalTextView setForceMaxHeight(boolean isForceMaxHeight) {
+        this.isForceMaxHeight = isForceMaxHeight;
+        return this;
+    }
+
+    public MagicalTextView setDetailsText(String detailsText) {
+        this.detailsText = detailsText;
         return this;
     }
 
@@ -420,26 +425,24 @@ public class MagicalTextView extends View {
     /**
      * 设置文本
      */
-    public MagicalTextView setText(String text, int boldEndIndex) {
+    public void setText(String text, int boldEndIndex) {
         if (TextUtils.isEmpty(text)) {
-            return this;
+            return;
         }
         setText(text);
         this.boldEndIndex = boldEndIndex;
-        return this;
     }
 
     /**
      * 设置文本
      */
-    public MagicalTextView setText(String text) {
+    public void setText(String text) {
         if (TextUtils.isEmpty(text)) {
-            return this;
+            return;
         }
 
         textCharArray = text.toCharArray();
         requestLayout();
-        return this;
     }
 
     public MagicalTextView setOnDetailsClickListener(OnDetailsClickListener onDetailsClickListener) {
@@ -447,7 +450,7 @@ public class MagicalTextView extends View {
         return this;
     }
 
-    interface OnDetailsClickListener {
+    public interface OnDetailsClickListener {
 
         void onDetailsClick(MagicalTextView magicalTextView);
     }
