@@ -122,7 +122,7 @@ public class MagicalTextView extends View {
         Drawable detailsImage = typedArray.getDrawable(R.styleable.MagicalTextView_mtv_details_image);
         detailsImageWidth = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_image_width, 20);
         detailsImageHeight = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_image_height, 30);
-        detailsImageMarginLeft = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_image_margin_left, 10);
+        detailsImageMarginLeft = typedArray.getDimensionPixelSize(R.styleable.MagicalTextView_mtv_details_image_margin_left, 0);
         if (detailsImage != null) {
             zoomBitmap(drawableToBitmap(detailsImage));
         }
@@ -301,7 +301,7 @@ public class MagicalTextView extends View {
             if (maxLine == i + 1) {
                 canvas.drawText(getPassText(lineText, true), paddingLeft, marginTop, defaultTextPaint);
                 canvas.drawText(detailsText, getDetailsStartX(), marginTop, detailsTextPaint);
-                drawDetailsBitmap(canvas, marginTop);
+                drawDetailsBitmap(canvas);
                 break;
             } else {
                 canvas.drawText(lineText, paddingLeft, marginTop, defaultTextPaint);
@@ -340,7 +340,7 @@ public class MagicalTextView extends View {
         return detailsImage == null ? x : (x - detailsImageWidth - detailsImageMarginLeft);
     }
 
-    private void drawDetailsBitmap(Canvas canvas, int marginTop) {
+    private void drawDetailsBitmap(Canvas canvas) {
         if (detailsImage != null) {
             float bitmapLeft = viewWidth - paddingRight - detailsImageWidth;
             Rect rect = new Rect();
@@ -349,11 +349,11 @@ public class MagicalTextView extends View {
             int textHeight = rect.height();
             float bitmapTop;
             if (imageHeight > textHeight) {
-                bitmapTop = marginTop - (textHeight + imageHeight) / 2f;
+                bitmapTop = viewHeight - (imageHeight - (imageHeight - textHeight) / 2f);
             } else {
-                bitmapTop = marginTop - paddingBottom - (textHeight - imageHeight) / 2f;
+                bitmapTop = viewHeight - (imageHeight + (textHeight - imageHeight) / 2f);
             }
-            canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, defaultTextPaint);
+            canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, detailsTextPaint);
         }
     }
 
