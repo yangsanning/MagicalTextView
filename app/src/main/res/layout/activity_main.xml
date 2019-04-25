@@ -27,7 +27,7 @@
         app:mtv_bold_text_size="18sp"
         app:mtv_default_text_size="16sp"
         app:mtv_details_image="@drawable/ic_arrow_blue"
-        app:mtv_details_text_size="12sp" />
+        app:mtv_details_text_size="11sp" />
 
     <ysn.com.magicaltextview.MagicalTextView
         android:id="@+id/main_activity_text_view2"

@@ -209,16 +209,21 @@ public class MagicalTextView extends View {
             String lineText = lineTextList.get(i);
             Rect lineTextRect = new Rect();
             defaultTextPaint.getTextBounds(lineText, 0, lineText.length(), lineTextRect);
-            if (heightMode == MeasureSpec.AT_MOST) {
-                if (i == length - 1 || i == maxLine - 1) {
-                    textHeight += lineTextRect.height() + paddingBottom + paddingTop;
-                } else {
-                    textHeight += (lineTextRect.height() + rowWidth);
-                }
+//            if (heightMode == MeasureSpec.AT_MOST) {
+//                if (i == length - 1 || i == maxLine - 1) {
+//                    textHeight += lineTextRect.height() + paddingBottom + paddingTop;
+//                } else {
+//                    textHeight += (lineTextRect.height() + rowWidth);
+//                }
+//            } else {
+//                if (textHeight == 0) {
+//                    textHeight = getMeasuredHeight();
+//                }
+//            }
+            if (i == length - 1 || i == maxLine - 1) {
+                textHeight += lineTextRect.height() + paddingBottom + paddingTop;
             } else {
-                if (textHeight == 0) {
-                    textHeight = getMeasuredHeight();
-                }
+                textHeight += (lineTextRect.height() + rowWidth);
             }
             textRectArray[i] = lineTextRect;
         }
@@ -342,7 +347,9 @@ public class MagicalTextView extends View {
     private void drawDetailsBitmap(Canvas canvas, int marginTop) {
         if (detailsImage != null) {
             float bitmapLeft = viewWidth - paddingRight - detailsImageWidth;
-            float bitmapTop = marginTop - textRectArray[maxLine - 1].height()/2f;
+            Rect rect = new Rect();
+            detailsTextPaint.getTextBounds(detailsText, 0, detailsText.length(), rect);
+            float bitmapTop = marginTop - paddingBottom - (rect.height() - detailsImageHeight) / 2f;
             canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, defaultTextPaint);
         }
     }
