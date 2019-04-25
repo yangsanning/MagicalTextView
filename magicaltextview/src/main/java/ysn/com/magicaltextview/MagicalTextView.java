@@ -345,34 +345,45 @@ public class MagicalTextView extends View {
             float bitmapLeft = viewWidth - paddingRight - detailsImageWidth;
             Rect rect = new Rect();
             detailsTextPaint.getTextBounds(detailsText, 0, detailsText.length(), rect);
-            float bitmapTop = marginTop - paddingBottom - (rect.height() - detailsImageHeight) / 2f;
+            int imageHeight = detailsImage.getHeight();
+            int textHeight = rect.height();
+            float bitmapTop;
+            if (imageHeight > textHeight) {
+                bitmapTop = marginTop - (textHeight + imageHeight) / 2f;
+            } else {
+                bitmapTop = marginTop - paddingBottom - (textHeight - imageHeight) / 2f;
+            }
             canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, defaultTextPaint);
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_MOVE:
-            case MotionEvent.ACTION_DOWN:
-                isRangeDown = isRangeDown(event);
-                break;
-            case MotionEvent.ACTION_UP:
-                // 判断是否是移动到外部再抬起手指
-                if (isOutsideUp(event)) {
-                    event.setAction(MotionEvent.ACTION_CANCEL);
+        if (TextUtils.isEmpty(detailsText)) {
+            return super.onTouchEvent(event);
+        } else {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_MOVE:
+                case MotionEvent.ACTION_DOWN:
+                    isRangeDown = isRangeDown(event);
                     break;
-                }
-                if (isRangeDown && isRangeDown(event) && onDetailsClickListener != null) {
-                    onDetailsClickListener.onDetailsClick(this);
-                } else {
-                    performClick();
-                }
-                break;
-            default:
-                break;
+                case MotionEvent.ACTION_UP:
+                    // 判断是否是移动到外部再抬起手指
+                    if (isOutsideUp(event)) {
+                        event.setAction(MotionEvent.ACTION_CANCEL);
+                        break;
+                    }
+                    if (isRangeDown && isRangeDown(event) && onDetailsClickListener != null) {
+                        onDetailsClickListener.onDetailsClick(this);
+                    } else {
+                        performClick();
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return true;
         }
-        return true;
     }
 
     /**
