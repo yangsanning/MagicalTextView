@@ -349,9 +349,9 @@ public class MagicalTextView extends View {
             int textHeight = rect.height();
             float bitmapTop;
             if (imageHeight > textHeight) {
-                bitmapTop = viewHeight - (imageHeight - (imageHeight - textHeight) / 2f);
+                bitmapTop = viewHeight - paddingBottom - (imageHeight - (imageHeight - textHeight) / 2f);
             } else {
-                bitmapTop = viewHeight - (imageHeight + (textHeight - imageHeight) / 2f);
+                bitmapTop = viewHeight - paddingBottom- (imageHeight + (textHeight - imageHeight) / 2f);
             }
             canvas.drawBitmap(detailsImage, bitmapLeft, bitmapTop, detailsTextPaint);
         }
