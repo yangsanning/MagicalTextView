@@ -71,11 +71,10 @@
 
 ```android
 allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
-	}  }
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
+	}
 }
 ```
 
@@ -84,5 +83,5 @@ allprojects {
 在需要添加依赖的 Module 下添加以下信息，使用方式和普通的远程仓库一样。
 
 ```android
-   implementation 'com.github.yangsanning:MagicalTextView:v1.0.7'
+implementation 'com.github.yangsanning:MagicalTextView:v1.0.7'
 ```
